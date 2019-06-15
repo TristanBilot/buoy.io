@@ -2,23 +2,20 @@ class Room {
   constructor(name, socketOfOwner) {
     this.name = name;
     this.players = [];
-    this.id = getRandomInt(1000000);
+    //this.id = getRandomInt(1000000);
     this.run = true;
-    addPlayer(socketOfOwner);
+    this.addPlayer(socketOfOwner);
   }
 
   addPlayer(player) {
-    players.push(player);
+    this.players.push(player);
   }
 
   getPlayer(socket) {
-    for each (player in players) {
-      if (player)
-    }
-  }
-
-  getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
+    player.forEach(function(player) {
+      if (socket == player.socket)
+        return player;
+    });
   }
 }
   module.exports = Room;

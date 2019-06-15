@@ -5,13 +5,74 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="description" content="Basic boilerplate code to get started with Matter.js.">
 
-        <title>Minimal Setup</title>
+        <title>buoy.io</title>
 
         <link rel="icon" type="image/png" href="favicon.png">
-        <link href="my.css" rel="stylesheet">
+        <link href="./my.css" rel="stylesheet">
 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
         <script src="scripts/matter.min.js" defer></script>
         <script src="my.js" defer></script>
+
     </head>
-    <body></body>
+    <body>
+      <p><input type="text" placeholder="Name of the room" id="roomName" /></p>
+      <p><input type="button" value="Connection to room" id="connectRoom" /></p>
+      <p><input type="button" value="Create room" id="createRoom" /></p>
+      <p style="color:green" id = "stateConnection"></p>
+
+      <ul id="roomsList">
+
+      </ul>
+
+       <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+       <script src="/socket.io/socket.io.js"></script>
+       <script>
+           const PORT = "9000";
+           const URL = "http://localhost:";
+           var socket = io.connect(URL + PORT + '/');
+
+           socket.on('emptyList', () => {
+              $('#roomsList').empty()
+            })
+           socket.on('roomsList', (id) => {
+              $('#roomsList').append('<li><i class="fas fa-plus-square"></i>' + id + '</li>')
+           })
+
+           $('#connectRoom').click(function () {
+               var roomName = $("#roomName").val();
+               socket.emit('joinRoom', roomName);
+               socket.emit('message', 'Tentative de connexion à la room: ' + roomName);
+               socket = io.connect(URL + PORT + '/' + roomName);
+               socket.on('joinRoomSuccess', function(message) {
+                 alert(message);
+               })
+              //document.location.href = URL + PORT + '/' + roomName;
+           })
+
+           $('#createRoom').click(function () {
+               var roomName = $("#roomName").val();
+               if (roomName == "") {
+                 alert('Can\'t be empty');
+                 return;
+               }
+               socket.emit('createRoom', roomName);
+               socket.on('createRoomSuccess', (message) => {
+                 $('#stateConnection').text(message);
+               })
+           })
+
+       </script>
+
+       <style>
+         #roomsList li {list-style: none;}
+         #roomsList li i {padding-right: 10px; color: #00acc1}
+       </style>
+
+    </body>
 </html>
