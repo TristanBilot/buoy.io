@@ -30,6 +30,10 @@ io.of('/').on('connection', function (socket) {
     })
 
     socket.on('createRoom', (id) => {
+      if (roomsById[id] != null) {
+        socket.emit('roomExists', true);
+        return;
+      }
       var newRoom = new Room(id, socket);
       rooms[socket] = newRoom;
       roomsById[id] = newRoom;

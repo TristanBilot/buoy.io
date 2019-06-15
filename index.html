@@ -21,10 +21,12 @@
 
     </head>
     <body>
-      <p><input type="text" placeholder="Name of the room" id="roomName" /></p>
-      <p><input type="button" value="Connection to room" id="connectRoom" /></p>
-      <p><input type="button" value="Create room" id="createRoom" /></p>
-      <p style="color:green" id = "stateConnection"></p>
+      <div id="initDiv">
+        <input type="text" placeholder="Name of the room" id="roomName" />
+        <input type="button" value="Connection to room" id="connectRoom" />
+        <input type="button" value="Create room" id="createRoom" />
+        <p style="color:green" id = "stateConnection"></p>
+      </div>
 
       <ul id="roomsList">
 
@@ -41,7 +43,7 @@
               $('#roomsList').empty()
             })
            socket.on('roomsList', (id) => {
-              $('#roomsList').append('<li><input type="button" id="room" val="' + id + '"><i class="fas fa-plus-square"></i>' + id + '</input></li>')
+              $('#roomsList').append('<li><i class="fas fa-plus-square"></i>' + id + '</li>')
            })
 
            $('#connectRoom').click(function () {
@@ -67,24 +69,10 @@
                })
            })
 
-           $('#room').click(function() {
-             alert("zz");
-             var roomName = $("#roomName").val();
-             console.log("zizi");
-             console.log($(this).attr('val'));
-             socket.emit('joinRoom', roomName);
-             socket.emit('message', 'Tentative de connexion à la room: ' + roomName);
-             socket = io.connect(URL + PORT + '/' + roomName);
-             socket.on('joinRoomSuccess', function(message) {
-               alert(message);
-             })
-            //document.location.href = URL + PORT + '/' + roomName;
-           })
-
        </script>
 
        <style>
-         #roomsList li {list-style: none;}
+         #roomsList li {list-style: none;margin-left: 30px}
          #roomsList li i {padding-right: 10px; color: #00acc1}
          #connectRoom, #createRoom {
            background: #8bc34a;
@@ -93,6 +81,17 @@
            padding: 5px 10px 5px 10px;
            color: #fff;
            border-radius: 30px;
+         }
+         #roomName {
+           border-radius: 20px;
+           border: none;
+           background: rgb(230, 230, 230);
+           padding: 7px 10px 7px 10px;
+           font-size: 12px;
+         }
+         #initDiv {
+           margin-left: 50px;
+
          }
        </style>
 
