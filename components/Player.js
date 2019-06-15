@@ -7,7 +7,7 @@ class Player {
     this.room = null;
   }
 
-  set setXY(x, y) {
+  setXY(x, y) {
     this.x = x;
     this.y = y;
   }

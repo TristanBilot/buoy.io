@@ -41,7 +41,7 @@
               $('#roomsList').empty()
             })
            socket.on('roomsList', (id) => {
-              $('#roomsList').append('<li><i class="fas fa-plus-square"></i>' + id + '</li>')
+              $('#roomsList').append('<li><input type="button" id="room" val="' + id + '"><i class="fas fa-plus-square"></i>' + id + '</input></li>')
            })
 
            $('#connectRoom').click(function () {
@@ -67,11 +67,33 @@
                })
            })
 
+           $('#room').click(function() {
+             alert("zz");
+             var roomName = $("#roomName").val();
+             console.log("zizi");
+             console.log($(this).attr('val'));
+             socket.emit('joinRoom', roomName);
+             socket.emit('message', 'Tentative de connexion à la room: ' + roomName);
+             socket = io.connect(URL + PORT + '/' + roomName);
+             socket.on('joinRoomSuccess', function(message) {
+               alert(message);
+             })
+            //document.location.href = URL + PORT + '/' + roomName;
+           })
+
        </script>
 
        <style>
          #roomsList li {list-style: none;}
          #roomsList li i {padding-right: 10px; color: #00acc1}
+         #connectRoom, #createRoom {
+           background: #8bc34a;
+           border: none;
+           font-size: 17px;
+           padding: 5px 10px 5px 10px;
+           color: #fff;
+           border-radius: 30px;
+         }
        </style>
 
     </body>
