@@ -173,7 +173,7 @@ document.onkeydown = function(e){
             Body.applyForce(user2, { x: user2.position.x, y: user2.position.y }, { x: 0, y: -1 });
             break;
         case "KeyA":
-            Body.applyForce(user2, { x: user2.position.x, y: user2.position.y }, { x: -0.05, y: 0 });
+            Body.applyForce(user2, { x: user2.position.x, y: user2.position.y }, { x: -0.05, y: 0 }); 
             break;
     }
 };
