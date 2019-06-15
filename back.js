@@ -46,14 +46,11 @@ io.of('/').on('connection', function (socket) {
 
     socket.on('joinRoom', function(id) {
       if (roomsById[id] != null && roomsById[id].players[socket] == null) {
-        console.log("OK");
-
         const route = io.of('/' + id);
         route.on('connection', function(socket){ // Connection to the game room
           socket.join(id);
           joinRoom(id, socket);
-          socket.broadcast.emit('joinRoomSuccess', 'Connection to the room ' + id + ' successed');
-          socket.emit('joinRoomSuccess', 'Connection to the room ' + id + ' successed');
+          socket.emit('joinRoomSuccess', '✅ Connection to the room ' + id + ' successed');
         });
 
         route.on('play', () => {
@@ -69,8 +66,10 @@ io.of('/').on('connection', function (socket) {
           socket.broadcast.emit('movePlayer', socketPlayer, x, y);
         })
       }
-      else
-        socket.emit('joinRoomFail', 'Ce jeu n\'existe pas encore');
+      else {
+        console.log("NOOO");
+      }
+
     })
 
     socket.on('disconnect', function() {
