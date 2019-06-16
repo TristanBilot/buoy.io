@@ -133,6 +133,7 @@
            text-align: center;
            margin-bottom: 20px;
            color: rgb(70, 70, 70);
+           transition: 300ms;
          }
          #initDiv {
            text-align: center;
@@ -167,14 +168,27 @@
        </style>
 
        <script>
-       function modal(str, state) {
-          var wordCount = str.split(/[\s-]+/).length;
-          var readingTime = Math.ceil(wordCount * 260);
-          $("#modal-msg").html(str).fadeIn(300).delay(readingTime).fadeOut(300, function () {
-              $(this).empty();
+         function modal(str, state) {
+            var wordCount = str.split(/[\s-]+/).length;
+            var readingTime = Math.ceil(wordCount * 260);
+            $("#modal-msg").html(str).fadeIn(300).delay(readingTime).fadeOut(300, function () {
+                $(this).empty();
+            });
+            state == 'success' ? $("#modal-msg").css('color', '#66bb6a') : $("#modal-msg").css('color', '#ef5350');
+          };
+
+          $('#roomName').focusin(function() {
+            $(this).css('width', '35%');
           });
-          state == 'success' ? $("#modal-msg").css('color', '#66bb6a') : $("#modal-msg").css('color', '#ef5350');
-        };
+          $('#roomName').focusout(function() {
+            $(this).css('width', '30%');
+          });
+          $('#roomName').keypress(function(event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            	if(keycode == '13'){
+            		$('#createRoom').click();
+            	}
+          })
        </script>
 
     </body>
