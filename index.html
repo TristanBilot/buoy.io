@@ -24,7 +24,7 @@
       <canvas id = "c"></canvas>
       <div id="initDiv">
         <input type="text" placeholder="Name of the room" id="roomName" /><br />
-        <input type="button" value="Connection to room" id="connectRoom" /><br />
+        <!-- <input type="button" value="Connection to room" id="connectRoom" /><br /> -->
         <input type="button" value="Create room" id="createRoom" />
         <div id="modal-msg"></div>
         <p style="color:green" id = "stateConnection"></p>
@@ -45,27 +45,10 @@
               $('#roomsList').empty()
             })
            socket.on('roomsList', (id) => {
-              $('#roomsList').append('<li><i class="fas fa-plus-square"></i>' + id + '</li>')
+              $('#roomsList').append('<li><a onclick="connectToRoom(\'' + id + '\')" class="liRoom" > <i class="fas fa-plus-square"></i>' + id + '</a></li>')
            })
 
-           $('#connectRoom').click(function () {
-               var roomName = $("#roomName").val();
-               socket.emit('joinRoom', roomName);
-
-               socket.emit('message', 'Try a connection at room: ' + roomName);
-               socket.on('joinRoomFail', (message) => {
-                 modal(msg, 'fail');
-                 return;
-               })
-
-               socket = io.connect(URL + PORT + '/' + roomName);
-               socket.on('joinRoomSuccess', function(message) {
-                 modal(message, 'success');
-               })
-
-              //document.location.href = URL + PORT + '/' + roomName;
-           })
-
+          /* Creation of a room */
            $('#createRoom').click(function () {
                var roomName = $("#roomName").val();
                if (roomName == "") {
@@ -81,6 +64,46 @@
                  $('#stateConnection').text(message);
                })
            })
+
+            /* Connection on a room, onclick of roomLists li a */
+           function connectToRoom(id) {
+             if (!($('#roomsList li:contains("' + id + '")').length)) {
+               modal('This room doesn\'t exists !', 'fail');
+               return;
+             }
+             document.location.href = URL + PORT + '/' + id;
+             /* A mettre dans la page de jeu, au chargement */
+
+             // var roomName = id;
+             // socket.emit('joinRoom', roomName);
+             // socket.emit('message', 'Try a connection at room: ' + roomName);
+             // socket.on('joinRoomFail', (message) => {
+             //   modal(msg, 'fail');
+             //   return;
+             // })
+             // socket = io.connect(URL + PORT + '/' + roomName);
+             // socket.on('joinRoomSuccess', function(message) {
+             //   modal(message, 'success');
+             // })
+
+            // Ca aussi pour recup id room en get
+             // function $_GET(param) {
+             //  	var vars = {};
+             //  	window.location.href.replace( location.hash, '' ).replace(
+             //  		/[?&]+([^=&]+)=?([^&]*)?/gi,
+             //  		function( m, key, value ) {
+             //  			vars[key] = value !== undefined ? value : '';
+             //  		}
+             //  	);
+             //  	if ( param ) {
+             //  		return vars[param] ? vars[param] : null;
+             //  	}
+             //  	return vars;
+             //  }
+             //  var name = $_GET('name'),
+             //  age = $_GET('age');
+
+           }
 
        </script>
 
@@ -133,22 +156,25 @@
             color:#333;
             box-shadow:0 0 5px #ccc;
             z-index:1;
-            padding:20px;
+            padding:15px 20px 15px 20px;
             font-size: 13px;
             border-radius: 30px;
             color: #ef9a9a;
+          }
+          .liRoom:hover {
+            cursor: pointer;
           }
        </style>
 
        <script>
        function modal(str, state) {
-        var wordCount = str.split(/[\s-]+/).length;
-        var readingTime = Math.ceil(wordCount * 260);
-        $("#modal-msg").html(str).fadeIn(300).delay(readingTime).fadeOut(300, function () {
-            $(this).empty();
-        });
-        state == 'success' ? $("#modal-msg").css('color', '#66bb6a') : $("#modal-msg").css('color', '#ef5350');
-      };
+          var wordCount = str.split(/[\s-]+/).length;
+          var readingTime = Math.ceil(wordCount * 260);
+          $("#modal-msg").html(str).fadeIn(300).delay(readingTime).fadeOut(300, function () {
+              $(this).empty();
+          });
+          state == 'success' ? $("#modal-msg").css('color', '#66bb6a') : $("#modal-msg").css('color', '#ef5350');
+        };
        </script>
 
     </body>

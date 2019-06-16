@@ -66,10 +66,6 @@ io.of('/').on('connection', function (socket) {
           socket.broadcast.emit('movePlayer', socketPlayer, x, y);
         })
       }
-      else {
-        console.log("NOOO");
-      }
-
     })
 
     socket.on('disconnect', function() {
