@@ -62,25 +62,26 @@ io.of('/').on('connection', function (socket) {
           socket.join(id);
           joinRoom(id, socket);
           socket.emit('joinRoomSuccess', '✅ Connection to the room ' + id + ' successed');
-          socket.on('play', () => {
-
-          })
-
-          socket.on('stop', () => {
-
-          })
 
           socket.on('location', (obj) => {
             players[socket].setXY(obj.x, obj.y);
-            let list = {};
-            for (let player of roomsById[id].players){
-              list[player.id] = {x: player.x, y: player.y}
-            }
-            socket.broadcast.emit('location', list);
-            console.log('list : ' + JSON.stringify(list));
           })
-        });
 
+          setInterval(() => {
+            let list = [];
+            for (let player of roomsById[id].players){
+              if (Number.isInteger(player.id))
+                list.push({x: player.x, y: player.y, id: player.id});
+            }
+            io.of(id).emit('location', list);
+          }, 200);
+
+          setInterval(() => {
+            io.of(id).emit('wave', {force: randomIntFromInterval(20, 30)})
+          }, 5000);
+
+
+        });
 
       }
     })
@@ -111,4 +112,8 @@ function joinRoom(id, socket) {
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
+}
+
+function randomIntFromInterval(min,max) {
+    return Math.floor(Math.random()*(max-min+1)+min);
 }

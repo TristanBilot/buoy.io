@@ -20,8 +20,7 @@ let config = {
 let defaultCategory = 0x0001,
     bridgeCategory = 0x0002;
 
-//Liste des joueurs en local
-let users = [];
+
 //Pour gerer l'emission de socket
 let sending = false;
 
@@ -179,36 +178,30 @@ let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
     });
 World.add(world, user);
 
-sendMove = (position) => {
-    if (!sending){
-        sending = true;
-        socket.emit('location', position);
-        sending = false;
-    }
-}
+setInterval(() =>
+  {socket.emit("location", { x: user.position.x, y: user.position.y })},
+  200
+)
 //Controle of the player
 document.onkeydown = function(e){
     //console.log(e.code);
     switch (e.code) {
         case "ArrowLeft":
             Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: -0.05, y: 0 });
-            sendMove({ x: user.position.x, y: user.position.y })
             break;
         case "ArrowRight":
             Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0.05, y: 0 });
-            sendMove({ x: user.position.x, y: user.position.y })
             break;
         case "ArrowUp":
             Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0, y: -1 });
-            sendMove({ x: user.position.x, y: user.position.y })
             break;
     }
 };
-setInterval(() => {
-    Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.y }, { x: 0, y: Math.random()*3 });
-    Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }, { x: 0, y: Math.random()*3 });
-    Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.y }, { x: 0, y: Math.random()*3 });
-}, 500);
+// setInterval(() => {
+//     Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.y }, { x: 0, y: Math.random()*3 });
+//     Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }, { x: 0, y: Math.random()*3 });
+//     Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.y }, { x: 0, y: Math.random()*3 });
+// }, 500);
 
 
 
@@ -228,34 +221,3 @@ World.add(world, mouseConstraint);*/
 
 // keep the mouse in sync with rendering
 //render.mouse = mouse;
-
-
-socket.on("location", (list) => {
-    if (list && list.players && list.players.length > 0){
-        for (let player of list.players){
-            Body.setPosition(users.find((el)=>{return el.id === player.id}), {x: player.x, y: player.y});
-        }
-    }
-})
-socket.on("wave", (wave) => {
-    if (wave)
-        Body.applyForce(
-            bridge.bodies[Math.floor(config.bridge_nb_tiles/2)],
-            { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y },
-            { x: 0, y: wave.force});
-})
-socket.on("update", (player) => {
-    if (player){
-        let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
-            collisionFilter: {mask: defaultCategory},
-            density: 0.06,
-            mass: 20,
-            render : {
-                fillStyle: player.color,
-            },
-            id: player.id,
-        });
-        users.push(user);
-        World.add(world, users);
-    }
-})
