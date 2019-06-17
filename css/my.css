@@ -36,7 +36,7 @@ canvas {
 	padding: 5px 10px 5px 10px;
 	color: #fff;
 	border-radius: 30px;
-	width: 30%;
+	width: 300px;
 	text-align: center;
 	margin-top: 10px;
 }
@@ -45,8 +45,8 @@ canvas {
 	border: none;
 	background: rgb(230, 230, 230);
 	padding: 7px 10px 7px 10px;
-	font-size: 12px;
-	width: 35%;
+	font-size: 14px;
+	width: 300px;
 	text-align: center;
 	margin-bottom: 20px;
 	color: rgb(70, 70, 70);
@@ -61,6 +61,7 @@ canvas {
  text-align: center;
  color: #00acc1;
  margin-top: 30px;
+ margin-bottom: 60px;
 }
 #roomsList {
  text-align: center;

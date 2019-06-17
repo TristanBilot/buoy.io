@@ -18,7 +18,7 @@
         <script src="my.js" defer ></script>
 
     </head>
-    <body>
+    <body onload="hideCanvas();">
       <h1 id = "title">buoy.io</h1>
       <div id="initDiv">
         <input type="text" placeholder="Name of the room" id="roomName" /><br />
@@ -99,7 +99,10 @@
                 $('#loading').fadeIn();
                 setTimeout(function() {
                   $('#loading').fadeOut();
-                }, 2000);
+                  setTimeout(function() {
+                    $('canvas').css('opacity', '1');
+                  }, 300);
+                }, 1000);
               });
             }
 
@@ -109,6 +112,7 @@
        </script>
 
        <script>
+         // Modal pop up
          function modal(str, state) {
             var wordCount = str.split(/[\s-]+/).length;
             var readingTime = Math.ceil(wordCount * 260);
@@ -116,14 +120,21 @@
                 $(this).empty();
             });
             state == 'success' ? $("#modal-msg").css('color', '#66bb6a') : $("#modal-msg").css('color', '#ef5350');
-          };
+          }
+          function hideCanvas() {
+            $('canvas').css('opacity', '0');
 
+          }
+
+          // Change width of input on focus
           $('#roomName').focusin(function() {
-            $(this).css('width', '35%');
+            $(this).css('width', $('#roomName').width() + 50);
           });
           $('#roomName').focusout(function() {
-            $(this).css('width', '30%');
+            $(this).css('width', $('#roomName').width() - 10);
           });
+
+          // Press enter to create a room
           $('#roomName').keypress(function(event) {
             var keycode = (event.keyCode ? event.keyCode : event.which);
             	if(keycode == '13'){

@@ -55,8 +55,10 @@ let render = Render.create({
         background: config.sky_color
     }
 });
+setTimeout(function() {
+  Render.run(render);
+}, 500);
 
-Render.run(render);
 
 // create runner
 let runner = Runner.create();
@@ -180,7 +182,8 @@ World.add(world, user);
 sendMove = (position) => {
     if (!sending){
         sending = true;
-        io.emit('location', position).then(() => {sending = false;});
+        socket.emit('location', position);
+        sending = false;
     }
 }
 //Controle of the player
@@ -224,24 +227,24 @@ setInterval(() => {
 World.add(world, mouseConstraint);*/
 
 // keep the mouse in sync with rendering
-render.mouse = mouse;
+//render.mouse = mouse;
 
 
-io.on("location", (list) => {
+socket.on("location", (list) => {
     if (list && list.players && list.players.length > 0){
         for (let player of list.players){
             Body.setPosition(users.find((el)=>{return el.id === player.id}), {x: player.x, y: player.y});
         }
     }
 })
-io.on("wave", (wave) => {
+socket.on("wave", (wave) => {
     if (wave)
         Body.applyForce(
             bridge.bodies[Math.floor(config.bridge_nb_tiles/2)],
-            { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }
-            { x: 0, y: wave.force);
+            { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y },
+            { x: 0, y: wave.force});
 })
-io.on("update", (player) => {
+socket.on("update", (player) => {
     if (player){
         let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
             collisionFilter: {mask: defaultCategory},
