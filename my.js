@@ -1,7 +1,11 @@
 
 let config = {
-    width: 1500,
-    height: 800,
+    width: 800,
+    height: 600,
+
+
+    bridge_nb_tiles: 17,
+
     boat_width: 200,
     boat_height: 20,
     boat_density: 0.03,
@@ -9,9 +13,18 @@ let config = {
 
     boat_color: '#555',
     sky_color: '#77b5fe',
-    water_color: '#20B2AA',
+    water_color: '#5C6BC0',
 
 };
+
+let defaultCategory = 0x0001,
+    bridgeCategory = 0x0002;
+
+//Liste des joueurs en local
+let users = [];
+//Pour gerer l'emission de socket
+let sending = false;
+
 
 let Engine = Matter.Engine,
     Render = Matter.Render,
@@ -32,7 +45,7 @@ let engine = Engine.create(),
 
 // create renderer
 let render = Render.create({
-    element: document.body,
+    element: document.body, 
     engine: engine,
     options: {
         width: config.width,
@@ -50,12 +63,9 @@ let runner = Runner.create();
 Runner.run(runner, engine);
 
 
-let defaultCategory = 0x0001,
-    bridgeCategory = 0x0002;
-
 let group = Body.nextGroup(true);
 
-let bridge = Composites.stack(config.width/2, config.height - 200, 31, 1, 0, 0, function (x, y) {
+let bridge = Composites.stack(config.width/2, config.height - 200, config.bridge_nb_tiles, 1, 0, 0, function (x, y) {
     return Bodies.rectangle(x - 20, y, 53, 100, {
         collisionFilter: {group: group, category: bridgeCategory},
         density: 0.005,
@@ -99,26 +109,26 @@ World.add(world, [
         render: {visible: false},
     }),
     //Fin Limite du terrain
-    //Sol invisible pour empecher de passer en dessous
-    Bodies.rectangle(config.width/2, config.height-30, config.width, 100, {
+    //Sol invisible pour empecher le bateau de couler
+    Bodies.rectangle(config.width/2, config.height-50, config.width, 100, {
         isStatic: true,
         render: {
             fillStyle: config.water_color,
         },
         collisionFilter: {
             group: group,
-            category: bridgeCategory},
+            category: bridgeCategory
+        },
     }),
 
     bridge,
     boat,
 
 
-    //constraints du pont
+    //contraintes du bridge
     Constraint.create({
         pointA: {x: -30, y: config.height-100},
         bodyB: bridge.bodies[0],
-        //pointB: {x: -25, y: 0},
         length: 1,
         stiffness: 0.9,
         render: {
@@ -128,14 +138,13 @@ World.add(world, [
     Constraint.create({
         pointA: {x: config.width + 30, y: config.height-100},
         bodyB: bridge.bodies[bridge.bodies.length - 1],
-        //pointB: {x: 25, y: 0},
         length: 1,
         stiffness: 0.9,
         render: {
             visible: true,
         }
     }),
-    //Constraints du boat
+    //Contraintes du boat
     Constraint.create({
         pointA: { x:  - 300, y: config.height },
         pointB: { x: -config.boat_width/2, y: 0 },
@@ -158,9 +167,50 @@ World.add(world, [
     }),
 ]);
 
+let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
+        collisionFilter: {mask: defaultCategory},
+        density: 0.06,
+        mass: 20,
+        render : {
+            fillStyle: '#FF55AA',
+        },
+    });
+World.add(world, user);
+
+sendMove = (position) => {
+    if (!sending){
+        sending = true;
+        io.emit('location', position).then(() => {sending = false;});
+    }
+}
+//Controle of the player
+document.onkeydown = function(e){
+    //console.log(e.code);
+    switch (e.code) {
+        case "ArrowLeft":
+            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: -0.05, y: 0 });
+            sendMove({ x: user.position.x, y: user.position.y })
+            break;
+        case "ArrowRight":
+            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0.05, y: 0 });
+            sendMove({ x: user.position.x, y: user.position.y })
+            break;
+        case "ArrowUp":
+            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0, y: -1 });
+            sendMove({ x: user.position.x, y: user.position.y })
+            break;
+    }
+};
+setInterval(() => {
+    Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.y }, { x: 0, y: Math.random()*3 });
+    Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }, { x: 0, y: Math.random()*3 });
+    Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.y }, { x: 0, y: Math.random()*3 });
+}, 500);
+
+
 
 // add mouse control
-let mouse = Mouse.create(render.canvas),
+/*let mouse = Mouse.create(render.canvas),
     mouseConstraint = MouseConstraint.create(engine, {
         mouse: mouse,
         constraint: {
@@ -171,65 +221,38 @@ let mouse = Mouse.create(render.canvas),
         }
     });
 
-World.add(world, mouseConstraint);
-
-let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
-        collisionFilter: {mask: defaultCategory},
-        density: 0.06,
-        mass: 20,
-        render : {
-            fillStyle: '#FF55AA',
-        },
-    });
-let user2 = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
-    collisionFilter: {mask: defaultCategory},
-    density: 0.06,
-    mass: 20,
-    render: {
-        fillStyle: '#FFA',
-    },
-});
-
-document.onkeydown = function(e){
-    //console.log(e.code);
-    switch (e.code) {
-        case "ArrowLeft":
-            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: -0.05, y: 0 });
-            break;
-        case "ArrowRight":
-            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0.05, y: 0 });
-            break;
-        case "ArrowUp":
-            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0, y: -1 });
-            break;
-        case "KeyD":
-            Body.applyForce(user2, { x: user2.position.x, y: user2.position.y }, { x: 0.05, y: 0 });
-            break;
-        case "KeyW":
-            Body.applyForce(user2, { x: user2.position.x, y: user2.position.y }, { x: 0, y: -1 });
-            break;
-        case "KeyA":
-            Body.applyForce(user2, { x: user2.position.x, y: user2.position.y }, { x: -0.05, y: 0 });
-            break;
-    }
-};
-setInterval(() => {
-    Body.applyForce(bridge.bodies[15], { x: bridge.bodies[15].position.x, y: bridge.bodies[15].position.y }, { x: 0, y: Math.random()*40+20 });
-}, 3000);
-setInterval(() => {
-    Body.applyForce(bridge.bodies[5], { x: bridge.bodies[5].position.x, y: bridge.bodies[5].position.y }, { x: 0, y: Math.random()*3 });
-    Body.applyForce(bridge.bodies[15], { x: bridge.bodies[15].position.x, y: bridge.bodies[15].position.y }, { x: 0, y: Math.random()*3 });
-    Body.applyForce(bridge.bodies[25], { x: bridge.bodies[25].position.x, y: bridge.bodies[25].position.y }, { x: 0, y: Math.random()*3 });
-}, 500);
-
-World.add(world, [user, user2]);
-
+World.add(world, mouseConstraint);*/
 
 // keep the mouse in sync with rendering
 render.mouse = mouse;
 
-// fit the render viewport to the scene
-/*Render.lookAt(render, {
-    min: {x: 0, y: 0},
-    max: {x: config.width, y: config.height,}
-});*/
+
+io.on("location", (list) => {
+    if (list && list.players && list.players.length > 0){
+        for (let player of list.players){
+            Body.setPosition(users.find((el)=>{return el.id === player.id}), {x: player.x, y: player.y});
+        }
+    }
+})
+io.on("wave", (wave) => {
+    if (wave)
+        Body.applyForce(
+            bridge.bodies[Math.floor(config.bridge_nb_tiles/2)], 
+            { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }
+            { x: 0, y: wave.force);
+})
+io.on("update", (player) => {
+    if (player){
+        let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
+            collisionFilter: {mask: defaultCategory},
+            density: 0.06,
+            mass: 20,
+            render : {
+                fillStyle: player.color,
+            },
+            id: player.id,
+        });
+        users.push(user);
+        World.add(world, users);
+    }
+})
