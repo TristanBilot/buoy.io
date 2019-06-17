@@ -8,7 +8,7 @@ let config = {
 
     boat_width: 200,
     boat_height: 20,
-    boat_density: 0.03,
+    boat_density: 0.06,
 
 
     boat_color: '#555',
@@ -151,7 +151,7 @@ World.add(world, [
         pointB: { x: -config.boat_width/2, y: 0 },
         bodyB: boat,
         length: 2,
-        stiffness: 0.0001,
+        stiffness: 0.001,
         render: {
             visible: false,
         }
@@ -161,7 +161,7 @@ World.add(world, [
         pointB: { x: config.boat_width/2, y: 0 },
         bodyB: boat,
         length: 2,
-        stiffness: 0.0001,
+        stiffness: 0.001,
         render: {
             visible: false,
         }
@@ -175,13 +175,12 @@ let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
         render : {
             fillStyle: '#FF55AA',
         },
+        id: Math.floor(Math.random() * 10000000),
     });
-World.add(world, user);
-
 setInterval(() =>
-  {socket.emit("location", { x: user.position.x, y: user.position.y })},
-  200
-)
+              {socket.emit("location", { x: user.position.x, y: user.position.y, id: user.id })}, 200);
+
+World.add(world, user);
 //Controle of the player
 document.onkeydown = function(e){
     //console.log(e.code);

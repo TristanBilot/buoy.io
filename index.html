@@ -84,27 +84,29 @@
              })
              //Liste des joueurs en local
              let users = [];
+
              socket.on("location", (list) => {
 
                  if (list && list.length > 0){
                      for (let player of list){
-                       console.log(player.id);
-                       let usr = users.find((el)=>{return el.id === player.id});
-                       if (usr)
-                         Body.setPosition(usr, {x: player.x, y: player.y});
-                       else{
-                         let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
-                                 collisionFilter: {mask: defaultCategory},
-                                 density: 0.06,
-                                 mass: 20,
-                                 render : {
-                                     fillStyle: player.color,
-                                 },
-                                 id: player.id
-                             });
-                             users.push(user);
-                         World.add(world, users);
-                        }
+                      if (player.id !== user.id){
+                          let usr = users.find((el)=>{return el.id === player.id});
+                          if (usr)
+                              Body.setPosition(usr, {x: player.x, y: player.y});
+                          else {
+                              let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
+                                  collisionFilter: {mask: defaultCategory},
+                                  density: 0.06,
+                                  mass: 20,
+                                  render : {
+                                      fillStyle: player.color,
+                                  },
+                                  id: player.id
+                              });
+                              users.push(user);
+                              World.add(world, users);
+                              }
+                          }
                      }
                  }
                  console.log('users : ' + users);

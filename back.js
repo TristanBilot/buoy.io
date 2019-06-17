@@ -64,6 +64,7 @@ io.of('/').on('connection', function (socket) {
           socket.emit('joinRoomSuccess', '✅ Connection to the room ' + id + ' successed');
 
           socket.on('location', (obj) => {
+            players[socket].id = obj.id;
             players[socket].setXY(obj.x, obj.y);
           })
 
