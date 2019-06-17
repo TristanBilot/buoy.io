@@ -1,4 +1,3 @@
-
 let config = {
     width: 800,
     height: 600,
@@ -54,8 +53,8 @@ let render = Render.create({
         background: config.sky_color
     }
 });
-setTimeout(function() {
-  Render.run(render);
+setTimeout(function () {
+    Render.run(render);
 }, 500);
 
 
@@ -66,7 +65,7 @@ Runner.run(runner, engine);
 
 let group = Body.nextGroup(true);
 
-let bridge = Composites.stack(config.width/2, config.height - 200, config.bridge_nb_tiles, 1, 0, 0, function (x, y) {
+let bridge = Composites.stack(config.width / 2, config.height - 200, config.bridge_nb_tiles, 1, 0, 0, function (x, y) {
     return Bodies.rectangle(x - 20, y, 53, 100, {
         collisionFilter: {group: group, category: bridgeCategory},
         density: 0.005,
@@ -84,7 +83,7 @@ Composites.chain(bridge, 0.3, 0, -0.3, 0, {
     }
 });
 
-let boat = Bodies.rectangle(config.width/2, config.height - 200, config.boat_width, config.boat_height, {
+let boat = Bodies.rectangle(config.width / 2, config.height - 200, config.boat_width, config.boat_height, {
     density: config.boat_density,
     collisionFilter: {category: defaultCategory},
     render: {fillStyle: config.boat_color}
@@ -94,24 +93,24 @@ let boat = Bodies.rectangle(config.width/2, config.height - 200, config.boat_wid
 World.add(world, [
 
     //Start Limite du terrain
-    Bodies.rectangle(0, 0, 10, config.height*2, {
+    Bodies.rectangle(0, 0, 10, config.height * 2, {
         isStatic: true,
         collisionFilter: {group: group},
         render: {visible: false},
     }),
-    Bodies.rectangle(config.width, 0, 10, config.height*2, {
+    Bodies.rectangle(config.width, 0, 10, config.height * 2, {
         isStatic: true,
         collisionFilter: {group: group},
         render: {visible: false},
     }),
-    Bodies.rectangle(config.width/2, config.height, config.width, 10, {
+    Bodies.rectangle(config.width / 2, config.height, config.width, 10, {
         isStatic: true,
         collisionFilter: {group: group},
         render: {visible: false},
     }),
     //Fin Limite du terrain
     //Sol invisible pour empecher le bateau de couler
-    Bodies.rectangle(config.width/2, config.height-50, config.width, 100, {
+    Bodies.rectangle(config.width / 2, config.height - 50, config.width, 100, {
         isStatic: true,
         render: {
             fillStyle: config.water_color,
@@ -128,7 +127,7 @@ World.add(world, [
 
     //contraintes du bridge
     Constraint.create({
-        pointA: {x: -30, y: config.height-100},
+        pointA: {x: -30, y: config.height - 100},
         bodyB: bridge.bodies[0],
         length: 1,
         stiffness: 0.9,
@@ -137,7 +136,7 @@ World.add(world, [
         }
     }),
     Constraint.create({
-        pointA: {x: config.width + 30, y: config.height-100},
+        pointA: {x: config.width + 30, y: config.height - 100},
         bodyB: bridge.bodies[bridge.bodies.length - 1],
         length: 1,
         stiffness: 0.9,
@@ -147,61 +146,63 @@ World.add(world, [
     }),
     //Contraintes du boat
     Constraint.create({
-        pointA: { x:  - 300, y: config.height },
-        pointB: { x: -config.boat_width/2, y: 0 },
+        pointA: {x: -300, y: config.height - 100},
+        pointB: {x: -config.boat_width / 2, y: 0},
         bodyB: boat,
         length: 2,
-        stiffness: 0.001,
+        stiffness: 0.0005,
         render: {
             visible: false,
         }
     }),
     Constraint.create({
-        pointA: { x:  config.width + 300, y: config.height },
-        pointB: { x: config.boat_width/2, y: 0 },
+        pointA: {x: config.width + 300, y: config.height - 100},
+        pointB: {x: config.boat_width / 2, y: 0},
         bodyB: boat,
         length: 2,
-        stiffness: 0.001,
+        stiffness: 0.0005,
         render: {
             visible: false,
         }
     }),
 ]);
 
-let user = Bodies.rectangle(config.width/2, config.height - 250, 20, 50, {
-        collisionFilter: {mask: defaultCategory},
-        density: 0.06,
-        mass: 20,
-        render : {
-            fillStyle: '#FF55AA',
-        },
-        id: Math.floor(Math.random() * 10000000),
-    });
-setInterval(() =>
-              {socket.emit("location", { x: user.position.x, y: user.position.y, id: user.id })}, 200);
+let user = Bodies.rectangle(config.width / 2, config.height - 250, 20, 20, {
+    collisionFilter: {mask: defaultCategory},
+    density: 0.06,
+    mass: 20,
+    render: {
+        fillStyle: '#FF55AA',
+    },
+    id: Math.floor(Math.random() * 10000000),
+});
+setInterval(() => {
+    //console.log(user.velocity);
+    socket.emit("location", {
+        x: user.position.x,
+        y: user.position.y,
+        angle: user.angle,
+        velocity: user.velocity,
+        id: user.id})
+}, 30);
+
+
 
 World.add(world, user);
 //Controle of the player
-document.onkeydown = function(e){
-    //console.log(e.code);
+document.onkeydown = function (e) {
     switch (e.code) {
         case "ArrowLeft":
-            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: -0.05, y: 0 });
+            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: -0.05, y: 0});
             break;
         case "ArrowRight":
-            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0.05, y: 0 });
+            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0.05, y: 0});
             break;
         case "ArrowUp":
-            Body.applyForce(user, { x: user.position.x, y: user.position.y }, { x: 0, y: -1 });
+            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0, y: -1});
             break;
     }
 };
-// setInterval(() => {
-//     Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3)].position.y }, { x: 0, y: Math.random()*3 });
-//     Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }, { x: 0, y: Math.random()*3 });
-//     Body.applyForce(bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)], { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/3*2)].position.y }, { x: 0, y: Math.random()*3 });
-// }, 500);
-
 
 
 // add mouse control

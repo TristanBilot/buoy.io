@@ -10,11 +10,11 @@ var roomsById = {}; // id => room
 
 var staticBasePath = './';
 // Index.html loading
-var server = http.createServer(function(req, res) {
-  var resolvedBase = path.resolve(staticBasePath);
-  var safeSuffix = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
-  var fileLoc = path.join(resolvedBase, safeSuffix);
-    fs.readFile(fileLoc, function(err, data) {
+var server = http.createServer(function (req, res) {
+    var resolvedBase = path.resolve(staticBasePath);
+    var safeSuffix = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+    var fileLoc = path.join(resolvedBase, safeSuffix);
+    fs.readFile(fileLoc, function (err, data) {
         if (err) {
             res.writeHead(404, 'Not Found');
             res.write('404: File Not Found!');
@@ -36,60 +36,64 @@ io.of('/').on('connection', function (socket) {
 
     emitRooms(socket, roomsById);
 
-    socket.on('message', function(message) {
-      console.log(message);
-    })
+    socket.on('message', function (message) {
+        console.log(message);
+    });
 
     socket.on('createRoom', (id) => {
-      if (roomsById[id] != null) {
-        socket.emit('roomExists', true);
-        return;
-      }
-      var newRoom = new Room(id, socket);
-      rooms[socket] = newRoom;
-      roomsById[id] = newRoom;
-      players[socket].room = newRoom;
-      //socket.emit('createRoomSuccess', 'The room has been created succesfully.');
-      socket.broadcast.emit('emptyList', true);
-      socket.emit('emptyList', true);
-      emitRooms(socket, roomsById);
-    })
+        if (roomsById[id] != null) {
+            socket.emit('roomExists', true);
+            return;
+        }
+        var newRoom = new Room(id, socket);
+        rooms[socket] = newRoom;
+        roomsById[id] = newRoom;
+        players[socket].room = newRoom;
+        //socket.emit('createRoomSuccess', 'The room has been created succesfully.');
+        socket.broadcast.emit('emptyList', true);
+        socket.emit('emptyList', true);
+        emitRooms(socket, roomsById);
+    });
 
-    socket.on('joinRoom', function(id) {
-      if (roomsById[id] != null && roomsById[id].players[socket] == null) {
-        const route = io.of('/' + id);
-        route.on('connection', function(socket){ // Connection to the game room
-          socket.join(id);
-          joinRoom(id, socket);
-          socket.emit('joinRoomSuccess', '✅ Connection to the room ' + id + ' successed');
+    socket.on('joinRoom', function (id) {
+        if (roomsById[id] != null && roomsById[id].players[socket] == null) {
+            const route = io.of('/' + id);
+            route.on('connection', function (socket) { // Connection to the game room
+                socket.join(id);
+                joinRoom(id, socket);
+                socket.emit('joinRoomSuccess', '✅ Connection to the room ' + id + ' successed');
 
-          socket.on('location', (obj) => {
-            players[socket].id = obj.id;
-            players[socket].setXY(obj.x, obj.y);
-          })
+                socket.on('location', (obj) => {
+                    players[socket].id = obj.id;
+                    players[socket].x = obj.x;
+                    players[socket].y = obj.y;
+                    players[socket].velocity = obj.velocity;
+                    players[socket].angle = obj.angle;
+                    //console.log(players[socket].toJSON());
+                });
 
-          setInterval(() => {
-            let list = [];
-            for (let player of roomsById[id].players){
-              if (Number.isInteger(player.id))
-                list.push({x: player.x, y: player.y, id: player.id});
-            }
-            io.of(id).emit('location', list);
-          }, 200);
+                setInterval(() => {
+                    let list = [];
+                    for (let player of roomsById[id].players) {
+                        if (Number.isInteger(player.id))
+                            list.push(player.toJSON());
+                    }
+                    io.of(id).emit('location', list);
+                }, 30);
 
-          setInterval(() => {
-            io.of(id).emit('wave', {force: randomIntFromInterval(20, 30)})
-          }, 5000);
+                setInterval(() => {
+                    io.of(id).emit('wave', {force: randomIntFromInterval(20, 30)})
+                }, 5000);
 
 
-        });
+            });
 
-      }
-    })
+        }
+    });
 
-    socket.on('disconnect', function() {
-      delete players[socket];
-      delete rooms[socket];
+    socket.on('disconnect', function () {
+        delete players[socket];
+        delete rooms[socket];
     });
 });
 
@@ -98,23 +102,23 @@ server.listen(9000);
 // ---------------------------------------
 
 function emitRooms(socket, rooms) { // O(n) so moderate
-  for (const [key, value] of Object.entries(rooms)) {
-    socket.broadcast.emit('roomsList', value.name);
-    socket.emit('roomsList', value.name);
-  }
+    for (const [key, value] of Object.entries(rooms)) {
+        socket.broadcast.emit('roomsList', value.name);
+        socket.emit('roomsList', value.name);
+    }
 }
 
 function joinRoom(id, socket) {
-  var room = roomsById[id];
-  room.addPlayer(players[socket]);
-  rooms[socket] = room;
-  players[socket].room = room;
+    var room = roomsById[id];
+    room.addPlayer(players[socket]);
+    rooms[socket] = room;
+    players[socket].room = room;
 }
 
 function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
+    return Math.floor(Math.random() * Math.floor(max));
 }
 
-function randomIntFromInterval(min,max) {
-    return Math.floor(Math.random()*(max-min+1)+min);
+function randomIntFromInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
