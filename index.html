@@ -7,7 +7,7 @@
         <title>buoy.io</title>
 
         <link rel="icon" type="image/png" href="favicon.png">
-        <link rel="stylesheet" href="my.css" >
+        <link rel="stylesheet" href="css/my.css" >
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
         <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
@@ -15,25 +15,22 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
         <script src="scripts/matter.min.js" defer></script>
-        <script src="my.js" ></script>
-        <script src="canvas.js" ></script>
+        <script src="my.js" defer ></script>
 
     </head>
     <body>
       <h1 id = "title">buoy.io</h1>
-      <canvas id = "c"></canvas>
       <div id="initDiv">
         <input type="text" placeholder="Name of the room" id="roomName" /><br />
         <!-- <input type="button" value="Connection to room" id="connectRoom" /><br /> -->
         <input type="button" value="Create room" id="createRoom" />
         <div id="modal-msg"></div>
-        <p style="color:green" id = "stateConnection"></p>
+        <ul id="roomsList"></ul>
       </div>
 
-      <ul id="roomsList">
-
-      </ul>
-
+      <center>
+        <svg id="loading" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-pacman" style="background: none;"><g ng-attr-style="display:{{config.showBean}}" style="display:block"><circle cx="50.8122" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#b2ebf2"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.67s" repeatCount="indefinite"></animate></circle><circle cx="71.2122" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#b2ebf2"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="-0.33s" repeatCount="indefinite"></animate></circle><circle cx="91.0122" cy="50" r="4" ng-attr-fill="{{config.c2}}" fill="#b2ebf2"><animate attributeName="cx" calcMode="linear" values="95;35" keyTimes="0;1" dur="1" begin="0s" repeatCount="indefinite"></animate><animate attributeName="fill-opacity" calcMode="linear" values="0;1;1" keyTimes="0;0.2;1" dur="1" begin="0s" repeatCount="indefinite"></animate></circle></g><g ng-attr-transform="translate({{config.showBeanOffset}} 0)" transform="translate(-15 0)"><path d="M50 50L20 50A30 30 0 0 0 80 50Z" ng-attr-fill="{{config.c1}}" fill="#00acc1" transform="rotate(5.98176 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path><path d="M50 50L20 50A30 30 0 0 1 80 50Z" ng-attr-fill="{{config.c1}}" fill="#00acc1" transform="rotate(-5.98176 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;-45 50 50;0 50 50" keyTimes="0;0.5;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></g></svg>
+      </center>
        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
        <script src="/socket.io/socket.io.js"></script>
        <script>
@@ -71,101 +68,45 @@
                modal('This room doesn\'t exists !', 'fail');
                return;
              }
-             document.location.href = URL + PORT + '/' + id;
              /* A mettre dans la page de jeu, au chargement */
 
-             // var roomName = id;
-             // socket.emit('joinRoom', roomName);
-             // socket.emit('message', 'Try a connection at room: ' + roomName);
-             // socket.on('joinRoomFail', (message) => {
-             //   modal(msg, 'fail');
-             //   return;
-             // })
-             // socket = io.connect(URL + PORT + '/' + roomName);
-             // socket.on('joinRoomSuccess', function(message) {
-             //   modal(message, 'success');
-             // })
+             var roomName = id;
+             socket.emit('joinRoom', roomName);
+             socket.emit('message', 'Try a connection at room: ' + roomName);
+             socket.on('joinRoomFail', (message) => {
+               modal(msg, 'fail');
+               return;
+             })
+             socket = io.connect(URL + PORT + '/' + roomName);
+             socket.on('joinRoomSuccess', function(message) {
+               modal(message, 'success');
+             })
 
-            // Ca aussi pour recup id room en get
-             // function $_GET(param) {
-             //  	var vars = {};
-             //  	window.location.href.replace( location.hash, '' ).replace(
-             //  		/[?&]+([^=&]+)=?([^&]*)?/gi,
-             //  		function( m, key, value ) {
-             //  			vars[key] = value !== undefined ? value : '';
-             //  		}
-             //  	);
-             //  	if ( param ) {
-             //  		return vars[param] ? vars[param] : null;
-             //  	}
-             //  	return vars;
-             //  }
-             //  var name = $_GET('name'),
-             //  age = $_GET('age');
+            // Hide the init div with transition effect
+            var box = $('#initDiv');
+            if (box.hasClass('hidden')) {
+              box.removeClass('hidden');
+              setTimeout(function () {
+                box.removeClass('visuallyhidden');
+              }, 20);
+            } else {
+              box.addClass('visuallyhidden');
+              box.one('transitionend', function(e) {
+                box.addClass('hidden');
+                // Display the loading svg
+                $('#loading').css('top', ($(document).height() / 2) - $('#loading').height() / 2)
+                $('#loading').css('left', ($(document).width() / 2) - $('#loading').width() / 2)
+                $('#loading').fadeIn();
+                setTimeout(function() {
+                  $('#loading').fadeOut();
+                }, 2000);
+              });
+            }
+
 
            }
 
        </script>
-
-       <style>
-         *:focus {  outline: none;}
-         #roomsList {margin-top: 40px;}
-         #roomsList li {list-style: none;margin-left: -40px;}
-         #roomsList li i {padding-right: 10px; color: #00acc1}
-         #connectRoom, #createRoom {
-           background: #00acc1;
-           border: none;
-           font-size: 17px;
-           padding: 5px 10px 5px 10px;
-           color: #fff;
-           border-radius: 30px;
-           width: 30%;
-           text-align: center;
-           margin-top: 10px;
-         }
-         #roomName {
-           border-radius: 20px;
-           border: none;
-           background: rgb(230, 230, 230);
-           padding: 7px 10px 7px 10px;
-           font-size: 12px;
-           width: 35%;
-           text-align: center;
-           margin-bottom: 20px;
-           color: rgb(70, 70, 70);
-           transition: 300ms;
-         }
-         #initDiv {
-           text-align: center;
-         }
-         #title {
-          font-size: 60px;
-          text-align: center;
-          color: #00acc1;
-          margin-top: 30px;
-         }
-         #roomsList {
-          text-align: center;
-         }
-         #modal-msg {
-            display:none;
-            position: absolute;
-            top: 40px;
-            right: 60px;
-            max-width: 400px;
-            background: #fff;
-            color:#333;
-            box-shadow:0 0 5px #ccc;
-            z-index:1;
-            padding:15px 20px 15px 20px;
-            font-size: 13px;
-            border-radius: 30px;
-            color: #ef9a9a;
-          }
-          .liRoom:hover {
-            cursor: pointer;
-          }
-       </style>
 
        <script>
          function modal(str, state) {

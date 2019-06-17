@@ -45,7 +45,7 @@ let engine = Engine.create(),
 
 // create renderer
 let render = Render.create({
-    element: document.body, 
+    element: document.body,
     engine: engine,
     options: {
         width: config.width,
@@ -237,7 +237,7 @@ io.on("location", (list) => {
 io.on("wave", (wave) => {
     if (wave)
         Body.applyForce(
-            bridge.bodies[Math.floor(config.bridge_nb_tiles/2)], 
+            bridge.bodies[Math.floor(config.bridge_nb_tiles/2)],
             { x: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.x, y: bridge.bodies[Math.floor(config.bridge_nb_tiles/2)].position.y }
             { x: 0, y: wave.force);
 })

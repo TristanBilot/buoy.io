@@ -1,0 +1,97 @@
+my.css*, *::before, *::after {
+	box-sizing: border-box;
+}
+
+html {
+	height: 100%;
+}
+
+body {
+	display: grid;
+	align-content: center;
+	justify-content: center;
+	min-height: 100%;
+	margin: 0;
+    background-color: #212529;
+}
+
+canvas {
+	border: 1px solid #868e96;
+	max-width: calc(100vw - 40px);
+	max-height: calc(100vh - 40px);
+}
+
+#roomsList li {
+	list-style: none;
+}
+
+*:focus {  outline: none;}
+#roomsList {margin-top: 40px;}
+#roomsList li {list-style: none;margin-left: -40px;}
+#roomsList li i {padding-right: 10px; color: #00acc1}
+#connectRoom, #createRoom {
+	background: #00acc1;
+	border: none;
+	font-size: 17px;
+	padding: 5px 10px 5px 10px;
+	color: #fff;
+	border-radius: 30px;
+	width: 30%;
+	text-align: center;
+	margin-top: 10px;
+}
+#roomName {
+	border-radius: 20px;
+	border: none;
+	background: rgb(230, 230, 230);
+	padding: 7px 10px 7px 10px;
+	font-size: 12px;
+	width: 35%;
+	text-align: center;
+	margin-bottom: 20px;
+	color: rgb(70, 70, 70);
+	transition: 300ms;
+}
+#initDiv {
+	text-align: center;
+	transition: all .3s linear;
+}
+#title {
+ font-size: 60px;
+ text-align: center;
+ color: #00acc1;
+ margin-top: 30px;
+}
+#roomsList {
+ text-align: center;
+}
+#modal-msg {
+	 display:none;
+	 position: absolute;
+	 top: 40px;
+	 right: 60px;
+	 max-width: 400px;
+	 background: #fff;
+	 color:#333;
+	 box-shadow:0 0 5px #ccc;
+	 z-index:1;
+	 padding:15px 20px 15px 20px;
+	 font-size: 13px;
+	 border-radius: 30px;
+	 color: #ef9a9a;
+ }
+ .liRoom:hover {
+	 cursor: pointer;
+ }
+ .hidden {
+	 display: none;
+ }
+ .visuallyhidden {
+	 opacity: 0;
+ }
+ #loading {
+	 position: absolute;
+	 margin-left: 60px;
+	 width:250px;
+	 height:250px;
+ }

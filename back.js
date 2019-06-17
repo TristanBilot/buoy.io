@@ -2,16 +2,27 @@ var Player = require('./components/Player.js');
 var Room = require('./components/Room.js');
 var http = require('http');
 var fs = require('fs');
+var path = require('path');
 
 var players = {}; // socket => user
 var rooms = {}; // socket => room
 var roomsById = {}; // id => room
 
+var staticBasePath = './';
 // Index.html loading
 var server = http.createServer(function(req, res) {
-    fs.readFile('./index.html', 'utf-8', function(error, content) {
-        res.writeHead(200, {"Content-Type": "text/html"});
-        res.end(content);
+  var resolvedBase = path.resolve(staticBasePath);
+  var safeSuffix = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+  var fileLoc = path.join(resolvedBase, safeSuffix);
+    fs.readFile(fileLoc, function(err, data) {
+        if (err) {
+            res.writeHead(404, 'Not Found');
+            res.write('404: File Not Found!');
+            return res.end();
+        }
+        res.statusCode = 200;
+        res.write(data);
+        return res.end();
     });
 });
 
