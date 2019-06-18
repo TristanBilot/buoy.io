@@ -45,49 +45,38 @@ io.of('/').on('connection', function (socket) {
             socket.emit('roomExists', true);
             return;
         }
-        var newRoom = new Room(id, socket);
-        rooms[socket] = newRoom;
+        room(id);
+
+
+        setInterval(() => {
+            let list = [];
+            for (let player of roomsById[id].players) {
+                if (Number.isInteger(player.id) && !player.lost)
+                    list.push(player.toJSON());
+            }
+            io.of(id).emit('location', list);
+        }, 30);
+
+        setInterval(() => {
+            io.of(id).emit('wave', {force: randomIntFromInterval(20, 30)})
+            //console.log('wave');
+        }, 5000);
+
+
+        var newRoom = new Room(id);
         roomsById[id] = newRoom;
-        players[socket].room = newRoom;
+        //players[socket].room = newRoom;
         //socket.emit('createRoomSuccess', 'The room has been created succesfully.');
         socket.broadcast.emit('emptyList', true);
         socket.emit('emptyList', true);
         emitRooms(socket, roomsById);
     });
 
-    socket.on('joinRoom', function (id) {
-        if (roomsById[id] != null && roomsById[id].players[socket] == null) {
-            const route = io.of('/' + id);
-            route.on('connection', function (socket) { // Connection to the game room
-                socket.join(id);
-                joinRoom(id, socket);
-                socket.emit('joinRoomSuccess', '✅ Connection to the room ' + id + ' successed');
-
-                socket.on('location', (obj) => {
-                    players[socket].id = obj.id;
-                    players[socket].x = obj.x;
-                    players[socket].y = obj.y;
-                    players[socket].velocity = obj.velocity;
-                    players[socket].angle = obj.angle;
-                    //console.log(players[socket].toJSON());
-                });
-
-                setInterval(() => {
-                    let list = [];
-                    for (let player of roomsById[id].players) {
-                        if (Number.isInteger(player.id))
-                            list.push(player.toJSON());
-                    }
-                    io.of(id).emit('location', list);
-                }, 30);
-
-                setInterval(() => {
-                    io.of(id).emit('wave', {force: randomIntFromInterval(20, 30)})
-                }, 5000);
-
-
-            });
-
+    socket.on('joinRoom', (id) => {
+        if (roomsById[id] && !roomsById[id].players[socket]){
+            console.log('room exists');
+            socket.join(id);
+            joinRoom(id, socket);
         }
     });
 
@@ -96,6 +85,28 @@ io.of('/').on('connection', function (socket) {
         delete rooms[socket];
     });
 });
+let room = (id) => {
+    io.of('/' + id).on('connection', (socket) => { // Connection to the game room
+        
+        console.log('✅ Connection to the room ' + id + ' successed');
+        socket.on('location', (obj) => {
+            if (players[socket]){
+                players[socket].id = obj.id;
+                players[socket].x = obj.x;
+                players[socket].y = obj.y;
+                players[socket].velocity = obj.velocity;
+                players[socket].angle = obj.angle;
+                //console.log(players[socket].toJSON());
+            }
+        });
+        socket.on('lost', (obj) => {
+            players[socket].lost = true;
+            console.log(players[socket].id + ' have lost.');
+        });
+    });
+}
+
+
 
 server.listen(9000);
 

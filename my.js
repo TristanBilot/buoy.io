@@ -14,6 +14,9 @@ let config = {
     sky_color: '#77b5fe',
     water_color: '#5C6BC0',
 
+    user_height: 50,
+    user_width: 50,
+
 };
 
 let defaultCategory = 0x0001,
@@ -107,6 +110,7 @@ World.add(world, [
         isStatic: true,
         collisionFilter: {group: group},
         render: {visible: false},
+        id: -1,
     }),
     //Fin Limite du terrain
     //Sol invisible pour empecher le bateau de couler
@@ -167,7 +171,7 @@ World.add(world, [
     }),
 ]);
 
-let user = Bodies.rectangle(config.width / 2, config.height - 250, 20, 20, {
+let user = Bodies.rectangle(config.width / 2, config.height - 250, config.user_width, config.user_height, {
     collisionFilter: {mask: defaultCategory},
     density: 0.06,
     mass: 20,
@@ -186,6 +190,15 @@ setInterval(() => {
         id: user.id})
 }, 30);
 
+Events.on(engine, 'collisionStart', function(e) {
+        var pairs = e.pairs;
+        for (let pair of pairs) {
+            if((pair.bodyB.id === user.id && pair.bodyA.id === -1) || (pair.bodyA.id === user.id && pair.bodyB.id === -1)){
+                socket.emit("lost", {id: user.id});
+            }
+        }
+    });
+
 
 
 World.add(world, user);
@@ -197,9 +210,6 @@ document.onkeydown = function (e) {
             break;
         case "ArrowRight":
             Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0.05, y: 0});
-            break;
-        case "ArrowUp":
-            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0, y: -1});
             break;
     }
 };

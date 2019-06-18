@@ -128,7 +128,6 @@
         let users = [];
 
         socket.on("location", (list) => {
-
             if (list && list.length > 0) {
                 for (let player of list) {
                     if (player.id !== user.id) {
@@ -140,7 +139,7 @@
                             Body.setAngle(usr, player.angle);
                             Body.setVelocity(usr, player.velocity);
                         } else {
-                            let user = Bodies.rectangle(config.width / 2, config.height - 250, 20, 20, {
+                            let user = Bodies.rectangle(config.width / 2, config.height - 250, config.user_width, config.user_width, {
                                 collisionFilter: {mask: defaultCategory},
                                 density: 0.06,
                                 mass: 20,
