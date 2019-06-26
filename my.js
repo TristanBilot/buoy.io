@@ -206,10 +206,13 @@ World.add(world, user);
 document.onkeydown = function (e) {
     switch (e.code) {
         case "ArrowLeft":
-            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: -0.05, y: 0});
+            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: -0.1, y: 0});
             break;
         case "ArrowRight":
-            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0.05, y: 0});
+            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0.1, y: 0});
+            break;
+        case "ArrowUp":
+            Body.applyForce(user, {x: user.position.x, y: user.position.y}, {x: 0, y: -0.7});
             break;
     }
 };
