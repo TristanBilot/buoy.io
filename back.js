@@ -51,7 +51,7 @@ io.of('/').on('connection', function (socket) {
         setInterval(() => {
             let list = [];
             for (let player of roomsById[id].players) {
-                if (Number.isInteger(player.id) && !player.lost)
+                if (player && Number.isInteger(player.id) && !player.lost)
                     list.push(player.toJSON());
             }
             io.of(id).emit('location', list);
