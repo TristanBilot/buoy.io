@@ -19,7 +19,7 @@ var server = http.createServer(function (req, res) {
             res.writeHead(404, 'Not Found');
             res.write('404: File Not Found!');
             return res.end();
-        }zefsdc
+        }
         res.statusCode = 200;
         res.write(data);
         return res.end();
